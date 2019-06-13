@@ -16,6 +16,7 @@ namespace CreditSuisseTests
             _hashingAlgorithmMock = new Mock<IHashingAlgorithm>();
             _hashingAlgorithmMock.Setup(m => m.Hash(It.IsAny<string>())).Returns(TestPin);
         }
+
         [Test]
         public void WithdrawShouldReturnOkAndBalanceUpdated()
         {
