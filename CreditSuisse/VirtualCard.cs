@@ -1,4 +1,6 @@
-﻿namespace CreditSuisse
+﻿using System;
+
+namespace CreditSuisse
 {
     public class VirtualCard
     {
@@ -27,6 +29,14 @@
                 Balance -= amount;
             }
             return WithdrawResult.Ok;
+        }
+
+        public void TopUp(decimal amount)
+        {
+            lock (_transactionLock)
+            {
+                Balance += amount;
+            }
         }
     }
 

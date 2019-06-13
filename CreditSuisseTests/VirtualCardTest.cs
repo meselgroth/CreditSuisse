@@ -38,5 +38,15 @@ namespace CreditSuisseTests
 
             result.Should().Be(WithdrawResult.LowBalance);
         }
+
+        [Test]
+        public void TopUpShouldAddToBalance()
+        {
+            var sut = new VirtualCard(0123, 10);
+
+            sut.TopUp(20);
+
+            sut.Balance.Should().Be(30);
+        }
     }
 }
