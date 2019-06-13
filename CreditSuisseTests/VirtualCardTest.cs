@@ -1,18 +1,27 @@
 using CreditSuisse;
 using FluentAssertions;
+using Moq;
 using NUnit.Framework;
 
 namespace CreditSuisseTests
 {
     public class VirtualCardTest
     {
+        private const string TestPin = "0123";
+        private Mock<IHashingAlgorithm> _hashingAlgorithmMock;
+
+        [SetUp]
+        public void Setup()
+        {
+            _hashingAlgorithmMock = new Mock<IHashingAlgorithm>();
+            _hashingAlgorithmMock.Setup(m => m.Hash(It.IsAny<string>())).Returns(TestPin);
+        }
         [Test]
         public void WithdrawShouldReturnOkAndBalanceUpdated()
         {
-            const short pin = 0123;
-            var sut = new VirtualCard(pin, 30);
+            var sut = new VirtualCard(TestPin, 30, _hashingAlgorithmMock.Object);
 
-            var result = sut.Withdraw(pin, 10);
+            var result = sut.Withdraw(TestPin, 10);
 
             result.Should().Be(WithdrawResult.Ok);
             sut.Balance.Should().Be(20);
@@ -21,9 +30,9 @@ namespace CreditSuisseTests
         [Test]
         public void WithdrawWithBadPinShouldReturnBadPin()
         {
-            var sut = new VirtualCard(0123, 30);
+            var sut = new VirtualCard(TestPin, 30, _hashingAlgorithmMock.Object);
 
-            var result = sut.Withdraw(9999, 10);
+            var result = sut.Withdraw("9999", 10);
 
             result.Should().Be(WithdrawResult.InvalidPin);
         }
@@ -31,10 +40,9 @@ namespace CreditSuisseTests
         [Test]
         public void WithdrawWithLowBalanceShouldReturnBadPin()
         {
-            const short pin = 0123;
-            var sut = new VirtualCard(pin, 10);
+            var sut = new VirtualCard(TestPin, 10, _hashingAlgorithmMock.Object);
 
-            var result = sut.Withdraw(pin, 20);
+            var result = sut.Withdraw(TestPin, 20);
 
             result.Should().Be(WithdrawResult.LowBalance);
         }
@@ -42,7 +50,7 @@ namespace CreditSuisseTests
         [Test]
         public void TopUpShouldAddToBalance()
         {
-            var sut = new VirtualCard(0123, 10);
+            var sut = new VirtualCard(TestPin, 10, _hashingAlgorithmMock.Object);
 
             sut.TopUp(20);
 

@@ -5,16 +5,16 @@ namespace CreditSuisse
     public class VirtualCard
     {
         private readonly object _transactionLock = new object();
-        private readonly short _pin;
-        public VirtualCard(short pin, decimal startingBalance)
+        private readonly string _pin;
+        public VirtualCard(string pin, decimal startingBalance, IHashingAlgorithm hashingAlgorithm)
         {
-            _pin = pin;
+            _pin = hashingAlgorithm.Hash(pin);
             Balance = startingBalance;
         }
 
         public decimal Balance { get; private set; }
 
-        public WithdrawResult Withdraw(short pin, decimal amount)
+        public WithdrawResult Withdraw(string pin, decimal amount)
         {
             if (pin != _pin)
             {
