@@ -6,13 +6,22 @@ namespace CreditSuisse
     {
         private readonly object _transactionLock = new object();
         private readonly string _pin;
+        private decimal _balance;
+
         public VirtualCard(string pin, decimal startingBalance, IHashingAlgorithm hashingAlgorithm)
         {
             _pin = hashingAlgorithm.Hash(pin);
-            Balance = startingBalance;
+            _balance = startingBalance;
         }
 
-        public decimal Balance { get; private set; }
+        public decimal Balance
+        {
+            get
+            {
+                lock (_transactionLock) 
+                    return _balance;
+            }
+        }
 
         public WithdrawResult Withdraw(string pin, decimal amount)
         {
@@ -22,11 +31,11 @@ namespace CreditSuisse
             }
             lock (_transactionLock)
             {
-                if (Balance < amount)
+                if (_balance < amount)
                 {   
                     return WithdrawResult.LowBalance;
                 }
-                Balance -= amount;
+                _balance -= amount;
             }
             return WithdrawResult.Ok;
         }
@@ -35,7 +44,7 @@ namespace CreditSuisse
         {
             lock (_transactionLock)
             {
-                Balance += amount;
+                _balance += amount;
             }
         }
     }
